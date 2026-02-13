@@ -1,0 +1,9 @@
+---
+title: "Assignment 3A Global Baseline Estimate"
+author: "Kiera Griffiths"
+format: html
+editor: visual
+---
+
+## Approach
+For this assignment, I will apply a global baseline estimate to a dataset of user ratings for six historical TV dramas. My goal is to estimate the Participant-1's missing rating for the show “Shogun”. I will first format the data into tidy data and compute the overall average rating. I will calculate the difference between each show’s ratings and the average rating (show bias) and how each user’s ratings differ from the average rating (user bias). I will use these biases to estimate the missing rating. I anticipate shows with limited ratings will affect the reliability of the averages I calculate is the data size will be limited.  
