@@ -2,8 +2,68 @@
 title: "Assignment 3A Global Baseline Estimate"
 author: "Kiera Griffiths"
 format: html
-editor: visual
+editor: source
 ---
 
 ## Approach
 For this assignment, I will apply a global baseline estimate to a dataset of user ratings for six historical TV dramas. My goal is to estimate the Participant-1's missing rating for the show “Shogun”. I will first format the data into tidy data and compute the overall average rating. I will calculate the difference between each show’s ratings and the average rating (show bias) and how each user’s ratings differ from the average rating (user bias). I will use these biases to estimate the missing rating. I anticipate shows with limited ratings will affect the reliability of the averages I calculate is the data size will be limited.  
+
+# 1. Load Required Package
+# tidyverse is used for data manipulation (dplyr) and reshaping (tidyr)
+library(tidyverse)
+
+# 2. Read CSV from URL
+# Read the historical TV drama ratings dataset directly from GitHub
+ratings <- read.csv(
+  "https://raw.githubusercontent.com/KieraG2026/Global-Baseline-Estimate/refs/heads/main/historical_tv_drama_ratings.csv",
+  na.strings = c("", "NA")
+)
+head(ratings)  # Check first few rows
+
+# 3. Convert Wide Format to Long Format
+# Each row = one rating (tidy data)
+ratings_long <- ratings %>%
+  pivot_longer(
+    -Participant,        # Keep participant as identifier
+    names_to = "Show",   # Column for TV show names
+    values_to = "Rating" # Column for ratings
+  )
+head(ratings_long)  # Verify long format
+
+# 4. Compute Global Mean (μ)
+# Average of all ratings, ignoring missing values
+global_mean <- mean(ratings_long$Rating, na.rm = TRUE)
+global_mean  # Print global mean
+
+# 5. Compute User Average Ratings
+# Average rating for each participant (user)
+user_avg <- ratings_long %>%
+  group_by(Participant) %>%
+  summarize(user_mean = mean(Rating, na.rm = TRUE))
+
+# 6. Compute User Bias (b_u)
+# How much each user deviates from the global mean
+user_bias <- user_avg %>%
+  mutate(b_u = user_mean - global_mean)
+user_bias  # Check Participant-1 bias
+
+# 7. Compute Show Average Ratings
+# Average rating for each TV show
+show_avg <- ratings_long %>%
+  group_by(Show) %>%
+  summarize(show_mean = mean(Rating, na.rm = TRUE))
+
+show_avg
+
+# 8. Compute Show Bias (b_i)
+# How much each show deviates from the global mean
+show_bias <- show_avg %>%
+  mutate(b_i = show_mean - global_mean)
+show_bias  # Check bias for Shogun
+
+# 9. Apply Global Baseline Formula
+# Predicted rating for Participant-1 for Shogun
+bu <- user_bias$b_u[user_bias$Participant == "Participant-1"]
+bi <- show_bias$b_i[show_bias$Show == "Shogun"]
+prediction <- global_mean + bu + bi
+prediction  # Print final prediction
